@@ -1,30 +1,98 @@
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-body { background-color: #000; overflow: hidden; touch-action: none; font-family: 'Arial', sans-serif; }
-#game-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+/* === RESETS Y BÁSICOS === */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    /* Evita el color azul al tocar en móviles */
+    -webkit-tap-highlight-color: transparent; 
+    /* Evita que se seleccione texto o imágenes al dejar presionado */
+    user-select: none; 
+    -webkit-user-select: none; 
+    touch-action: none; /* Desactiva gestos nativos del navegador */
+}
 
-#pantalla-principal { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: filter 0.3s ease; }
+body { 
+    background-color: #000; 
+    overflow: hidden; /* Evita scroll */
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Arial', sans-serif; 
+    
+    /* === SOLUCIÓN BARRA DE GESTOS MÓVIL === */
+    /* Añade un espacio de seguridad automático abajo para la rayita de gestos */
+    padding-bottom: env(safe-area-inset-bottom);
+    /* Añade espacio de seguridad arriba por si hay notch (cámara en pantalla) */
+    padding-top: env(safe-area-inset-top);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-#capas-botones { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
-.capa-btn { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.1s ease; transform-origin: center 90%; }
+#game-container { 
+    position: relative; 
+    /* Usamos porcentajes para que sea flexible dentro del body seguro */
+    width: 100%; 
+    height: 100%; 
+    overflow: hidden; 
+}
 
+/* === FONDO DEL JUEGO === */
+#pantalla-principal { 
+    width: 100%; 
+    height: 100%; 
+    /* El fondo sí debe cubrir toda la pantalla */
+    object-fit: cover; 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    z-index: 1; 
+    transition: filter 0.3s ease; 
+}
+
+/* === CAPAS DE BOTONES VISUALES === */
+#capas-botones { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    pointer-events: none; /* Deja pasar los clicks a los hitboxes */
+    z-index: 5; 
+    
+    /* Centramos el contenido por si la imagen es más angosta que la pantalla */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.capa-btn { 
+    position: absolute; 
+    /* Mantenemos posición absoluta para apilarlas */
+    width: 100%; 
+    height: 100%; 
+    
+    /* === SOLUCIÓN BOTONES CORTADOS === */
+    /* Cambiamos 'cover' por 'contain'. 
+       Esto asegura que TODA la imagen de botones (izq y der) 
+       se vea dentro de la pantalla sin cortarse. */
+    object-fit: contain; 
+    
+    transition: transform 0.1s ease; 
+    transform-origin: center center; 
+}
+
+/* === BOTÓN JUGAR INICIAL === */
 #btn-jugar { 
     position: absolute; 
-    
-    /* CON ESTE LO MUEVES ARRIBA O ABAJO */
-    /* Entre más pequeño sea el número (ej. 5%), más hacia ABAJO se va a ir. 
-       Entre más grande sea (ej. 20%), más hacia ARRIBA se va a mover. */
-    bottom: 5%; 
-    
+    /* Levantado un poco más para librar barra de gestos por seguridad */
+    bottom: 10%; 
     left: 50%; 
     transform: translateX(-50%); 
     
-    /* CON ESTOS DOS LO HACES MÁS GRANDE O MÁS CHICO */
-    /* width controla qué porcentaje de la pantalla ocupa. Súbelo (ej. 75%) para hacerlo más grande. */
-    width: 75%; 
-    
-    /* max-width es el tope. Si subes el width, también sube un poco este (ej. a 300px) 
-       para que el botón tenga permiso de crecer más. */
-    max-width: 280px; 
+    /* Tamaño responsivo */
+    width: 60%; 
+    max-width: 250px; 
     
     z-index: 20; 
     background: none; 
@@ -36,13 +104,18 @@ body { background-color: #000; overflow: hidden; touch-action: none; font-family
 #btn-jugar img { width: 100%; height: auto; }
 #btn-jugar:active { transform: translateX(-50%) scale(0.9); }
 
-/* Botón de Pausa (Ahora más grande) */
+/* === BOTÓN DE PAUSA (CORREGIDO) === */
 #btn-pausa { 
     position: absolute; 
-    top: 3%; 
-    right:-26%; 
-    width: 40%; /* Antes estaba en 16%, lo subimos para que abarque más pantalla */
-    max-width: 190px; /* Antes estaba en 80px, esto permite que crezca más */
+    top: 2%; /* Pequeño margen superior */
+    
+    /* === SOLUCIÓN PAUSA FUERA DE PANTALLA === */
+    right: 3%; /* Valor positivo pequeño para pegarlo a la derecha visible */
+    
+    /* Tamaño ajustado para ser visible pero no gigante */
+    width: 15%; 
+    max-width: 70px; 
+    
     z-index: 30; 
     background: none; 
     border: none; 
@@ -53,42 +126,184 @@ body { background-color: #000; overflow: hidden; touch-action: none; font-family
 #btn-pausa img { width: 100%; height: auto; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.4)); }
 #btn-pausa:active { transform: scale(0.85); }
 
-#zonas-click { position: absolute; bottom: 2%; left: 0; width: 100%; height: 15%; display: flex; justify-content: space-evenly; align-items: center; z-index: 15; }
-.hitbox { width: 22%; height: 100%; background: transparent; border: none; outline: none; cursor: pointer; }
+/* === ZONAS DE CLICK (HITBOXES) === */
+#zonas-click { 
+    position: absolute; 
+    /* Alineado con la parte inferior visual de las imágenes (.capa-btn) */
+    bottom: 5%; 
+    left: 0; 
+    width: 100%; 
+    height: 15%; 
+    
+    display: flex; 
+    justify-content: space-evenly; 
+    align-items: center; 
+    z-index: 15; 
+    
+    /* padding horizontal para que los hitboxes de las orillas 
+       no queden tan pegados si la pantalla es muy ancha */
+    padding: 0 2%; 
+}
 
-.animar-click { transform: scale(0.95); filter: brightness(0.8); }
+.hitbox { 
+    width: 22%; 
+    height: 100%; 
+    background: transparent; /* Invisibles */
+    border: none; 
+    outline: none; 
+    cursor: pointer; 
+}
 
-@keyframes latido { 0% { transform: translate(-50%, -50%) scale(1); } 15% { transform: translate(-50%, -50%) scale(1.15); } 30% { transform: translate(-50%, -50%) scale(1); } 45% { transform: translate(-50%, -50%) scale(1.15); } 100% { transform: translate(-50%, -50%) scale(1); } }
+/* Efecto visual de feedback al tocar los hitboxes invisibles */
+.hitbox:active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
 
-#mensaje-amor, #mensaje-comida { position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%) scale(0); border-radius: 30px; font-weight: 900; text-align: center; z-index: 20; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; white-space: nowrap; }
+/* Clase para animar los botones visuales desde JS */
+.animar-click { 
+    transform: scale(0.9) !important; 
+    filter: brightness(0.8); 
+}
+
+/* === ANIMACIONES === */
+@keyframes latido { 
+    0% { transform: translate(-50%, -50%) scale(1); } 
+    15% { transform: translate(-50%, -50%) scale(1.15); } 
+    30% { transform: translate(-50%, -50%) scale(1); } 
+    45% { transform: translate(-50%, -50%) scale(1.15); } 
+    100% { transform: translate(-50%, -50%) scale(1); } 
+}
+
+/* === MENSAJES === */
+#mensaje-amor, #mensaje-comida { 
+    position: absolute; 
+    top: 25%; 
+    left: 50%; 
+    transform: translate(-50%, -50%) scale(0); 
+    border-radius: 30px; 
+    font-weight: 900; 
+    text-align: center; 
+    z-index: 20; 
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    pointer-events: none; 
+    white-space: nowrap; 
+}
 #mensaje-amor { background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%); color: #ff1493; padding: 15px 30px; border: 3px solid #ff69b4; font-size: 24px; box-shadow: 0px 10px 25px rgba(255, 105, 180, 0.5); }
 #mensaje-amor.mostrar { transform: translate(-50%, -50%) scale(1); animation: latido 1.5s infinite; animation-delay: 0.4s; }
 
 #mensaje-comida { background: linear-gradient(135deg, #fffacd 0%, #ffebcd 100%); color: #ff8c00; padding: 15px 30px; border: 3px solid #ffa500; font-size: 20px; box-shadow: 0px 10px 25px rgba(255, 140, 0, 0.4); }
 #mensaje-comida.mostrar { transform: translate(-50%, -50%) scale(1); animation: latido 1.5s infinite; animation-delay: 0.2s; }
 
-#mensaje-burbuja { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(255, 255, 255, 0.95); color: #333; padding: 12px 25px; border-radius: 20px; border: 2px solid #ccc; font-size: 18px; font-weight: bold; text-align: center; box-shadow: 0px 5px 15px rgba(0,0,0,0.2); z-index: 25; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; white-space: nowrap; }
+#mensaje-burbuja { 
+    position: absolute; 
+    top: 20%; 
+    left: 50%; 
+    transform: translate(-50%, -50%) scale(0); 
+    background: rgba(255, 255, 255, 0.95); 
+    color: #333; 
+    padding: 12px 25px; 
+    border-radius: 20px; 
+    border: 2px solid #ccc; 
+    font-size: 18px; 
+    font-weight: bold; 
+    text-align: center; 
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.2); 
+    z-index: 25; 
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    pointer-events: none; 
+    white-space: nowrap; 
+}
 #mensaje-burbuja.mostrar { transform: translate(-50%, -50%) scale(1); }
 
-#contenedor-particulas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; overflow: hidden; }
-.particula { position: absolute; color: #ff4b82; font-size: 24px; opacity: 0; animation: flotar linear forwards; }
-@keyframes flotar { 0% { transform: translateY(100vh) scale(0.5); opacity: 1; } 100% { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
+/* === PARTÍCULAS === */
+#contenedor-particulas { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    pointer-events: none; 
+    z-index: 10; 
+    overflow: hidden; 
+}
+.particula { 
+    position: absolute; 
+    color: #ff4b82; 
+    font-size: 24px; 
+    opacity: 0; 
+    animation: flotar linear forwards; 
+}
+@keyframes flotar { 
+    0% { transform: translateY(100vh) scale(0.5); opacity: 1; } 
+    100% { transform: translateY(-10vh) scale(1.5); opacity: 0; } 
+}
 
-/* === DISEÑO DEL MENÚ DE PAUSA CORREGIDO === */
-#menu-pausa { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100; }
-.capa-pausa { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; transition: transform 0.1s ease; transform-origin: center; }
-.animacion-flotar { animation: flotar-titulo 3s ease-in-out infinite; transform-origin: center top; }
+/* === DISEÑO DEL MENÚ DE PAUSA === */
+#menu-pausa { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: rgba(0, 0, 0, 0.45); 
+    /* Efecto Blur */
+    backdrop-filter: blur(8px); 
+    -webkit-backdrop-filter: blur(8px); 
+    z-index: 100; 
+}
+.capa-pausa { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    /* También usamos contain aquí para que el menú no se corte */
+    object-fit: contain; 
+    pointer-events: none; 
+    transition: transform 0.1s ease; 
+    transform-origin: center center; 
+}
+.animacion-flotar { 
+    animation: flotar-titulo 3s ease-in-out infinite; 
+    transform-origin: center top; 
+}
 
-@keyframes flotar-titulo { 0% { transform: translateY(0); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0); } }
+@keyframes flotar-titulo { 
+    0% { transform: translateY(0); } 
+    50% { transform: translateY(-15px); } 
+    100% { transform: translateY(0); } 
+}
 
-/* Hitboxes del Menú de Pausa (Zonas invisibles) */
-.hitbox-pausa { position: absolute; left: 15%; width: 70%; height: 10%; background: transparent; border: none; outline: none; z-index: 105; cursor: pointer; }
-/* Si al picarle a un botón no reacciona, ajusta ligeramente estos porcentajes de "top" */
+/* Hitboxes del Menú de Pausa (Zonas invisibles apiladas) */
+.hitbox-pausa { 
+    position: absolute; 
+    left: 15%; 
+    width: 70%; 
+    height: 10%; 
+    background: transparent; 
+    border: none; 
+    outline: none; 
+    z-index: 105; 
+    cursor: pointer; 
+}
+/* Posiciones verticales ajustadas para tus imágenes transparentes */
 .btn-pos-1 { top: 41%; } 
 .btn-pos-2 { top: 52.5%; }
 .btn-pos-3 { top: 64%; }
 
-/* Congela animaciones cuando hay pausa */
-.congelar-animaciones * { animation-play-state: paused !important; }
+/* Feedback táctil para menú pausa */
+.hitbox-pausa:active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+}
 
-.oculto { display: none !important; }
+/* === UTILIDADES === */
+/* Congela animaciones cuando hay pausa (clase añadida desde JS) */
+.congelar-animaciones * { 
+    animation-play-state: paused !important; 
+}
+
+.oculto { 
+    display: none !important; 
+}
