@@ -4,6 +4,7 @@
 const imagenesAPrecargar = [
     'imagenes/intro.png', 'imagenes/normal.png', 'imagenes/normal_cocina.png', 
     'imagenes/normal_cuarto.png', 'imagenes/baño_normal.png',
+    'imagenes/normal_recamara.png', 'imagenes/usando_telefono.png', 'imagenes/dormido_cama.png',
     'imagenes/boca_abierta.png', 'imagenes/masticando.png', 
     'imagenes/dormido.png', 'imagenes/corazones.png',
     'imagenes/tecleando.png', 'imagenes/jugando.png', 
@@ -19,7 +20,7 @@ document.addEventListener('touchmove', function (event) { if (event.scale !== 1)
 let lastTouchEnd = 0;
 document.addEventListener('touchend', function (event) { let now = (new Date()).getTime(); if (now - lastTouchEnd <= 300) { event.preventDefault(); } lastTouchEnd = now; }, false);
 
-// Instanciar Audios
+// Instanciar Audios Generales
 const audioJugar = new Audio('sonidos/jugar.mp3');
 const musicaFondo = new Audio('sonidos/cancion.mp3');
 musicaFondo.loop = true;
@@ -30,12 +31,20 @@ const audioComida = new Audio('sonidos/comida.mp3');
 const audioMasticar = new Audio('sonidos/masticar.mp3');
 const audioTecleando = new Audio('sonidos/tecleando.mp3');
 const audioJugando = new Audio('sonidos/jugando.mp3');
-audioTecleando.loop = true; 
-audioJugando.loop = true;
+audioTecleando.loop = true; audioJugando.loop = true;
 
 const audioRegadera = new Audio('sonidos/regadera.mp3');
 const audioTaza = new Audio('sonidos/taza.mp3');
 audioRegadera.loop = true; 
+
+// NUEVOS AUDIOS RECAMARA
+const audioTiktok1 = new Audio('sonidos/tiktok1.mp3');
+const audioTiktok2 = new Audio('sonidos/tiktok2.mp3');
+const audioTiktok3 = new Audio('sonidos/tiktok3.mp3');
+const audioDormido1 = new Audio('sonidos/dormido1.mp3');
+const audioDormido2 = new Audio('sonidos/dormido2.mp3');
+
+const audioPausa = new Audio('sonidos/pausa.mp3');
 
 // DOM - Menús y Botones Globales
 const pantallaPrincipal = document.getElementById('pantalla-principal');
@@ -64,6 +73,8 @@ const imgTeclado = document.getElementById('img-teclado');
 const imgControl = document.getElementById('img-control');
 const imgJabon = document.getElementById('img-jabon');
 const imgTaza = document.getElementById('img-taza');
+const imgTelefono = document.getElementById('img-telefono');
+const imgSueno = document.getElementById('img-sueno');
 
 const imgRegresarVisual = document.getElementById('img-regresar-visual');
 const imgToggleMusica = document.getElementById('img-toggle-musica');
@@ -74,17 +85,18 @@ const hitAcc1 = document.getElementById('hitbox-acc1');
 const hitAcc2 = document.getElementById('hitbox-acc2');
 const hitDer = document.getElementById('hitbox-der');
 
-const audioPausa = new Audio('sonidos/pausa.mp3');
-
-const escenas = ['sala', 'cocina', 'cuarto', 'baño'];
+// Arreglo de escenas incluyendo la Recámara
+const escenas = ['sala', 'cocina', 'cuarto', 'baño', 'recamara'];
 let escenaActual = 0; 
 let estaDormido = false; let estaComiendo = false;
 let estaTecleando = false; let estaJugando = false;
 let estaEnRegadera = false; let estaEnTaza = false;
+let estaUsandoTelefono = false; let estaDurmiendoCama = false;
 let musicaPausada = false;
 
 let timeoutMensaje = null; let timeoutComida = null; let timeoutMasticar = null;
 let timeoutBurbuja = null; let intervaloBurbuja = null;
+let audioActivoRecamara = null; // Controla qué audio dinámico pausar/reanudar
 
 // ==============================
 // LÓGICA DEL MENÚ DE PAUSA
@@ -92,7 +104,6 @@ let timeoutBurbuja = null; let intervaloBurbuja = null;
 
 btnPausa.addEventListener('click', () => {
     animarBotonVisual(btnPausa);
-    
     audioPausa.currentTime = 0;
     audioPausa.play().catch(() => {});
     
@@ -104,6 +115,7 @@ btnPausa.addEventListener('click', () => {
         if (estaTecleando) audioTecleando.pause();
         if (estaJugando) audioJugando.pause();
         if (estaEnRegadera) audioRegadera.pause();
+        if (audioActivoRecamara) audioActivoRecamara.pause();
     }, 150);
 });
 
@@ -117,6 +129,7 @@ btnRegresar.addEventListener('click', () => {
         if (estaTecleando) audioTecleando.play().catch(()=>{});
         if (estaJugando) audioJugando.play().catch(()=>{});
         if (estaEnRegadera) audioRegadera.play().catch(()=>{});
+        if (audioActivoRecamara) audioActivoRecamara.play().catch(()=>{});
     }, 150);
 });
 
@@ -178,10 +191,23 @@ function ocultarBurbuja() {
 
 function detenerSonidosEInteracciones() {
     estaTecleando = false; estaJugando = false; estaEnRegadera = false; estaEnTaza = false;
+    estaUsandoTelefono = false; estaDurmiendoCama = false;
+    
     audioTecleando.pause(); audioTecleando.currentTime = 0;
     audioJugando.pause(); audioJugando.currentTime = 0;
     audioRegadera.pause(); audioRegadera.currentTime = 0;
     audioTaza.pause(); audioTaza.currentTime = 0;
+    
+    if (audioActivoRecamara) {
+        audioActivoRecamara.pause();
+        audioActivoRecamara.currentTime = 0;
+        audioActivoRecamara = null;
+    }
+    
+    // Detener ráfagas viejas de audios de recámara
+    const audiosRecamara = [audioTiktok1, audioTiktok2, audioTiktok3, audioDormido1, audioDormido2];
+    audiosRecamara.forEach(a => { a.pause(); a.currentTime = 0; });
+    
     clearInterval(intervaloBurbuja); ocultarBurbuja();
 }
 
@@ -191,23 +217,27 @@ function actualizarEscena() {
     mensajeComida.classList.add('oculto'); mensajeComida.classList.remove('mostrar');
     detenerSonidosEInteracciones();
     
-    const btnSala = document.querySelectorAll('.btn-sala'); const btnCocina = document.querySelectorAll('.btn-cocina');
-    const btnCuarto = document.querySelectorAll('.btn-cuarto'); const btnBano = document.querySelectorAll('.btn-bano');
+    const btnSala = document.querySelectorAll('.btn-sala'); 
+    const btnCocina = document.querySelectorAll('.btn-cocina');
+    const btnCuarto = document.querySelectorAll('.btn-cuarto'); 
+    const btnBano = document.querySelectorAll('.btn-bano');
+    const btnRecamara = document.querySelectorAll('.btn-recamara');
 
     if (escenas[escenaActual] === 'sala') {
         pantallaPrincipal.src = 'imagenes/normal.png';
-        btnSala.forEach(b => b.classList.remove('oculto')); btnCocina.forEach(b => b.classList.add('oculto')); btnCuarto.forEach(b => b.classList.add('oculto')); btnBano.forEach(b => b.classList.add('oculto'));
+        btnSala.forEach(b => b.classList.remove('oculto')); btnCocina.forEach(b => b.classList.add('oculto')); btnCuarto.forEach(b => b.classList.add('oculto')); btnBano.forEach(b => b.classList.add('oculto')); btnRecamara.forEach(b => b.classList.add('oculto'));
     } else if (escenas[escenaActual] === 'cocina') {
         pantallaPrincipal.src = 'imagenes/normal_cocina.png';
-        btnSala.forEach(b => b.classList.add('oculto')); btnCocina.forEach(b => b.classList.remove('oculto')); btnCuarto.forEach(b => b.classList.add('oculto')); btnBano.forEach(b => b.classList.add('oculto'));
+        btnSala.forEach(b => b.classList.add('oculto')); btnCocina.forEach(b => b.classList.remove('oculto')); btnCuarto.forEach(b => b.classList.add('oculto')); btnBano.forEach(b => b.classList.add('oculto')); btnRecamara.forEach(b => b.classList.add('oculto'));
     } else if (escenas[escenaActual] === 'cuarto') {
         pantallaPrincipal.src = 'imagenes/normal_cuarto.png';
-        btnSala.forEach(b => b.classList.add('oculto')); btnCocina.forEach(b => b.classList.add('oculto'));
-        btnCuarto.forEach(b => b.classList.remove('oculto')); btnBano.forEach(b => b.classList.add('oculto'));
+        btnSala.forEach(b => b.classList.add('oculto')); btnCocina.forEach(b => b.classList.add('oculto')); btnCuarto.forEach(b => b.classList.remove('oculto')); btnBano.forEach(b => b.classList.add('oculto')); btnRecamara.forEach(b => b.classList.add('oculto'));
     } else if (escenas[escenaActual] === 'baño') {
         pantallaPrincipal.src = 'imagenes/baño_normal.png';
-        btnSala.forEach(b => b.classList.add('oculto')); btnCocina.forEach(b => b.classList.add('oculto')); btnCuarto.forEach(b => b.classList.add('oculto'));
-        btnBano.forEach(b => b.classList.remove('oculto'));
+        btnSala.forEach(b => b.classList.add('oculto')); btnCocina.forEach(b => b.classList.add('oculto')); btnCuarto.forEach(b => b.classList.add('oculto')); btnBano.forEach(b => b.classList.remove('oculto')); btnRecamara.forEach(b => b.classList.add('oculto'));
+    } else if (escenas[escenaActual] === 'recamara') {
+        pantallaPrincipal.src = 'imagenes/normal_recamara.png';
+        btnSala.forEach(b => b.classList.add('oculto')); btnCocina.forEach(b => b.classList.add('oculto')); btnCuarto.forEach(b => b.classList.add('oculto')); btnBano.forEach(b => b.classList.add('oculto')); btnRecamara.forEach(b => b.classList.remove('oculto'));
     }
 }
 
@@ -242,22 +272,39 @@ hitAcc1.addEventListener('click', () => {
         if (estaEnRegadera) { audioRegadera.pause(); audioRegadera.currentTime = 0; estaEnRegadera = false; clearInterval(intervaloBurbuja); ocultarBurbuja(); }
         if (estaEnTaza) { pantallaPrincipal.src = 'imagenes/baño_normal.png'; audioTaza.pause(); audioTaza.currentTime = 0; estaEnTaza = false; clearInterval(intervaloBurbuja); ocultarBurbuja(); } 
         else { 
-            pantallaPrincipal.src = 'imagenes/sentado_taza.png'; 
-            estaEnTaza = true;
-            
-            audioTaza.currentTime = 0;
-            audioTaza.play().catch(() => {});
-            
+            pantallaPrincipal.src = 'imagenes/sentado_taza.png'; estaEnTaza = true;
+            audioTaza.currentTime = 0; audioTaza.play().catch(() => {});
             const pujidos = ["¡Hnnnng...! 🚽", "¡Ufff...! 🧻", "¡Fuerza...! 💢"];
             mostrarBurbuja(pujidos[0], 2000);
-            
             intervaloBurbuja = setInterval(() => { 
-                let txt = pujidos[Math.floor(Math.random() * pujidos.length)]; 
-                mostrarBurbuja(txt, 2000); 
-                
-                audioTaza.currentTime = 0;
-                audioTaza.play().catch(() => {});
+                let txt = pujidos[Math.floor(Math.random() * pujidos.length)]; mostrarBurbuja(txt, 2000); 
+                audioTaza.currentTime = 0; audioTaza.play().catch(() => {});
             }, 4000);
+        }
+    } else if (escenas[escenaActual] === 'recamara') {
+        animarBotonVisual(imgTelefono);
+        if (estaDurmiendoCama) { 
+            if (audioActivoRecamara) audioActivoRecamara.pause();
+            estaDurmiendoCama = false; clearInterval(intervaloBurbuja); ocultarBurbuja();
+        }
+        if (estaUsandoTelefono) {
+            pantallaPrincipal.src = 'imagenes/normal_recamara.png';
+            if (audioActivoRecamara) { audioActivoRecamara.pause(); audioActivoRecamara.currentTime = 0; audioActivoRecamara = null; }
+            estaUsandoTelefono = false; clearInterval(intervaloBurbuja); ocultarBurbuja();
+        } else {
+            pantallaPrincipal.src = 'imagenes/usando_telefono.png'; estaUsandoTelefono = true;
+            const tiktoks = [audioTiktok1, audioTiktok2, audioTiktok3];
+            const frasesTiktok = ["¡Viendo TikToks de risa! 📱", "Un clip más y a dormir... 👁️👄👁️", "¡Encontré un buen edit! 🔥"];
+            
+            function lanzarTiktok() {
+                tiktoks.forEach(a => { a.pause(); a.currentTime = 0; });
+                let rand = Math.floor(Math.random() * tiktoks.length);
+                audioActivoRecamara = tiktoks[rand];
+                audioActivoRecamara.play().catch(()=>{});
+                mostrarBurbuja(frasesTiktok[rand], 2000);
+            }
+            lanzarTiktok();
+            intervaloBurbuja = setInterval(lanzarTiktok, 4000);
         }
     }
 });
@@ -287,6 +334,31 @@ hitAcc2.addEventListener('click', () => {
             const chiflidos = ["🎶 Fiu fiu fiuuu 🧼 🎶", "🎶 Lalalala 🚿 🎶", "🎶 Turururú 🎶"];
             mostrarBurbuja(chiflidos[0], 2000);
             intervaloBurbuja = setInterval(() => { let txt = chiflidos[Math.floor(Math.random() * chiflidos.length)]; mostrarBurbuja(txt, 2000); }, 4000);
+        }
+    } else if (escenas[escenaActual] === 'recamara') {
+        animarBotonVisual(imgSueno);
+        if (estaUsandoTelefono) { 
+            if (audioActivoRecamara) audioActivoRecamara.pause();
+            estaUsandoTelefono = false; clearInterval(intervaloBurbuja); ocultarBurbuja();
+        }
+        if (estaDurmiendoCama) {
+            pantallaPrincipal.src = 'imagenes/normal_recamara.png';
+            if (audioActivoRecamara) { audioActivoRecamara.pause(); audioActivoRecamara.currentTime = 0; audioActivoRecamara = null; }
+            estaDurmiendoCama = false; clearInterval(intervaloBurbuja); ocultarBurbuja();
+        } else {
+            pantallaPrincipal.src = 'imagenes/dormido_cama.png'; estaDurmiendoCama = true;
+            const ronquidos = [audioDormido1, audioDormido2];
+            const frasesSueno = ["Zzz... ¡A mimir pesado! 😴", "Roncan2 bien a gusto con Ruty 💤"];
+            
+            function lanzarSueno() {
+                ronquidos.forEach(a => { a.pause(); a.currentTime = 0; });
+                let rand = Math.floor(Math.random() * ronquidos.length);
+                audioActivoRecamara = ronquidos[rand];
+                audioActivoRecamara.play().catch(()=>{});
+                mostrarBurbuja(frasesSueno[rand], 2000);
+            }
+            lanzarSueno();
+            intervaloBurbuja = setInterval(lanzarSueno, 4000);
         }
     }
 });

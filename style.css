@@ -42,7 +42,6 @@ body {
     left: 0; 
     z-index: 1; 
     transition: filter 0.3s ease; 
-    /* OPTIMIZACIÓN GPU */
     will-change: filter, content;
 }
 
@@ -58,8 +57,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* EMPUJAMOS TODO HACIA ARRIBA PARA LIBRAR LA BARRITA */
-    transform: translateY(-6%); 
+    transform: translateY(-15%); 
 }
 
 .capa-btn { 
@@ -69,18 +67,17 @@ body {
     object-fit: contain; 
     transition: transform 0.1s ease; 
     transform-origin: center center; 
-    /* OPTIMIZACIÓN GPU */
     will-change: transform;
 }
 
 /* === BOTÓN JUGAR INICIAL === */
 #btn-jugar { 
     position: absolute; 
-    bottom: 12%; /* Lo subimos también para que no estorbe */
+    bottom: 1%; 
     left: 50%; 
     transform: translateX(-50%); 
-    width: 60%; 
-    max-width: 250px; 
+    width: 100%; 
+    max-width: 350px; 
     z-index: 20; 
     background: none; 
     border: none; 
@@ -94,10 +91,10 @@ body {
 /* === BOTÓN DE PAUSA === */
 #btn-pausa { 
     position: absolute; 
-    top: 2%; 
-    right: 3%; 
-    width: 15%; 
-    max-width: 70px; 
+    top: 8%; 
+    right: -30%; 
+    width: 90%; 
+    max-width: 200px; 
     z-index: 30; 
     background: none; 
     border: none; 
@@ -111,8 +108,7 @@ body {
 /* === ZONAS DE CLICK (HITBOXES) === */
 #zonas-click { 
     position: absolute; 
-    /* AHORA SÍ, BIEN ARRIBA PARA LIBRAR LA BARRA DE GESTOS */
-    bottom: 12%; 
+    bottom: 18%; 
     left: 0; 
     width: 100%; 
     height: 15%; 
