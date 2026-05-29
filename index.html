@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>My Talking Pelos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="imagenes/favicon.png">
+</head>
+<body>
+    <div id="game-container">
+        <img id="pantalla-principal" src="imagenes/intro.png" alt="Pantalla de Juego">
+        
+        <div id="contenedor-particulas"></div>
+        <div id="mensaje-amor" class="oculto">Te amo mucho Amicita ❤️</div>
+        <div id="mensaje-comida" class="oculto">¡Muchas gracias amorcito! ❤️</div>
+        <div id="mensaje-burbuja" class="oculto"></div>
+
+        <div id="capas-botones" class="oculto">
+            <img src="imagenes/izq.png" class="capa-btn" id="img-izq">
+            <img src="imagenes/foco1.png" class="capa-btn btn-sala" id="img-foco">
+            <img src="imagenes/corazon.png" class="capa-btn btn-sala" id="img-corazon">
+            <img src="imagenes/dorito.png" class="capa-btn btn-cocina oculto" id="img-dorito">
+            <img src="imagenes/pizza.png" class="capa-btn btn-cocina oculto" id="img-pizza">
+            <img src="imagenes/teclado.png" class="capa-btn btn-cuarto oculto" id="img-teclado">
+            <img src="imagenes/control.png" class="capa-btn btn-cuarto oculto" id="img-control">
+            <img src="imagenes/jabon.png" class="capa-btn btn-bano oculto" id="img-jabon">
+            <img src="imagenes/taza.png" class="capa-btn btn-bano oculto" id="img-taza">
+            <img src="imagenes/der.png" class="capa-btn" id="img-der">
+        </div>
+
+        <div id="zonas-click" class="oculto">
+            <button id="hitbox-izq" class="hitbox"></button>
+            <button id="hitbox-acc1" class="hitbox"></button> 
+            <button id="hitbox-acc2" class="hitbox"></button> 
+            <button id="hitbox-der" class="hitbox"></button>
+        </div>
+
+        <button id="btn-pausa" class="boton-esquina oculto">
+            <img src="imagenes/pausa_boton.png" alt="Pausa">
+        </button>
+
+        <button id="btn-jugar" class="boton-flotante">
+            <img src="imagenes/jugar.png" alt="Jugar">
+        </button>
+
+        <div id="menu-pausa" class="oculto">
+            <img src="imagenes/titulo.png" class="capa-pausa animacion-flotar">
+            <img id="img-toggle-musica" src="imagenes/pausar_musica.png" class="capa-pausa">
+            <img src="imagenes/regresar.png" class="capa-pausa" id="img-regresar-visual">
+            <img src="imagenes/salir_menu.png" class="capa-pausa" id="img-salir-visual">
+
+            <button id="btn-toggle-musica" class="hitbox-pausa btn-pos-1"></button>
+            <button id="btn-regresar" class="hitbox-pausa btn-pos-2"></button>
+            <button id="btn-salir-menu" class="hitbox-pausa btn-pos-3"></button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
