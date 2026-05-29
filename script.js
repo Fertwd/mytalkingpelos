@@ -1,3 +1,20 @@
+// ==============================
+// SISTEMA DE PRECARGA (OPTIMIZACIÓN)
+// ==============================
+const imagenesAPrecargar = [
+    'imagenes/intro.png', 'imagenes/normal.png', 'imagenes/normal_cocina.png', 
+    'imagenes/normal_cuarto.png', 'imagenes/baño_normal.png',
+    'imagenes/boca_abierta.png', 'imagenes/masticando.png', 
+    'imagenes/dormido.png', 'imagenes/corazones.png',
+    'imagenes/tecleando.png', 'imagenes/jugando.png', 
+    'imagenes/sentado_taza.png', 'imagenes/bañandose.png'
+];
+
+imagenesAPrecargar.forEach(src => {
+    const img = new Image();
+    img.src = src;
+});
+
 document.addEventListener('touchmove', function (event) { if (event.scale !== 1) { event.preventDefault(); } }, { passive: false });
 let lastTouchEnd = 0;
 document.addEventListener('touchend', function (event) { let now = (new Date()).getTime(); if (now - lastTouchEnd <= 300) { event.preventDefault(); } lastTouchEnd = now; }, false);
@@ -19,7 +36,6 @@ audioJugando.loop = true;
 const audioRegadera = new Audio('sonidos/regadera.mp3');
 const audioTaza = new Audio('sonidos/taza.mp3');
 audioRegadera.loop = true; 
-// A la taza le quitamos el loop para controlarlo manualmente con los textos
 
 // DOM - Menús y Botones Globales
 const pantallaPrincipal = document.getElementById('pantalla-principal');
@@ -49,7 +65,6 @@ const imgControl = document.getElementById('img-control');
 const imgJabon = document.getElementById('img-jabon');
 const imgTaza = document.getElementById('img-taza');
 
-// Imágenes visuales del menú de pausa
 const imgRegresarVisual = document.getElementById('img-regresar-visual');
 const imgToggleMusica = document.getElementById('img-toggle-musica');
 const imgSalirVisual = document.getElementById('img-salir-visual');
@@ -59,7 +74,6 @@ const hitAcc1 = document.getElementById('hitbox-acc1');
 const hitAcc2 = document.getElementById('hitbox-acc2');
 const hitDer = document.getElementById('hitbox-der');
 
-// Nuevo audio de pausa
 const audioPausa = new Audio('sonidos/pausa.mp3');
 
 const escenas = ['sala', 'cocina', 'cuarto', 'baño'];
@@ -90,7 +104,6 @@ btnPausa.addEventListener('click', () => {
         if (estaTecleando) audioTecleando.pause();
         if (estaJugando) audioJugando.pause();
         if (estaEnRegadera) audioRegadera.pause();
-        // La taza ya no necesita pausarse aquí porque no es un loop continuo
     }, 150);
 });
 
@@ -232,7 +245,6 @@ hitAcc1.addEventListener('click', () => {
             pantallaPrincipal.src = 'imagenes/sentado_taza.png'; 
             estaEnTaza = true;
             
-            // Reproducir sonido junto con el primer texto
             audioTaza.currentTime = 0;
             audioTaza.play().catch(() => {});
             
@@ -243,7 +255,6 @@ hitAcc1.addEventListener('click', () => {
                 let txt = pujidos[Math.floor(Math.random() * pujidos.length)]; 
                 mostrarBurbuja(txt, 2000); 
                 
-                // Reproducir el sonido cada vez que sale un nuevo texto de esfuerzo
                 audioTaza.currentTime = 0;
                 audioTaza.play().catch(() => {});
             }, 4000);

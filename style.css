@@ -3,25 +3,21 @@
     margin: 0; 
     padding: 0; 
     box-sizing: border-box; 
-    /* Evita el color azul al tocar en móviles */
     -webkit-tap-highlight-color: transparent; 
-    /* Evita que se seleccione texto o imágenes al dejar presionado */
     user-select: none; 
     -webkit-user-select: none; 
-    touch-action: none; /* Desactiva gestos nativos del navegador */
+    touch-action: none; 
 }
 
 body { 
     background-color: #000; 
-    overflow: hidden; /* Evita scroll */
+    overflow: hidden; 
     width: 100vw;
     height: 100vh;
     font-family: 'Arial', sans-serif; 
     
-    /* === SOLUCIÓN BARRA DE GESTOS MÓVIL === */
-    /* Añade un espacio de seguridad automático abajo para la rayita de gestos */
-    padding-bottom: env(safe-area-inset-bottom);
-    /* Añade espacio de seguridad arriba por si hay notch (cámara en pantalla) */
+    /* SEGURIDAD EXTRA PARA BARRA DE GESTOS */
+    padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
     padding-top: env(safe-area-inset-top);
     
     display: flex;
@@ -31,7 +27,6 @@ body {
 
 #game-container { 
     position: relative; 
-    /* Usamos porcentajes para que sea flexible dentro del body seguro */
     width: 100%; 
     height: 100%; 
     overflow: hidden; 
@@ -41,13 +36,14 @@ body {
 #pantalla-principal { 
     width: 100%; 
     height: 100%; 
-    /* El fondo sí debe cubrir toda la pantalla */
     object-fit: cover; 
     position: absolute; 
     top: 0; 
     left: 0; 
     z-index: 1; 
     transition: filter 0.3s ease; 
+    /* OPTIMIZACIÓN GPU */
+    will-change: filter, content;
 }
 
 /* === CAPAS DE BOTONES VISUALES === */
@@ -57,43 +53,34 @@ body {
     left: 0; 
     width: 100%; 
     height: 100%; 
-    pointer-events: none; /* Deja pasar los clicks a los hitboxes */
+    pointer-events: none; 
     z-index: 5; 
-    
-    /* Centramos el contenido por si la imagen es más angosta que la pantalla */
     display: flex;
     justify-content: center;
     align-items: center;
+    /* EMPUJAMOS TODO HACIA ARRIBA PARA LIBRAR LA BARRITA */
+    transform: translateY(-6%); 
 }
 
 .capa-btn { 
     position: absolute; 
-    /* Mantenemos posición absoluta para apilarlas */
     width: 100%; 
     height: 100%; 
-    
-    /* === SOLUCIÓN BOTONES CORTADOS === */
-    /* Cambiamos 'cover' por 'contain'. 
-       Esto asegura que TODA la imagen de botones (izq y der) 
-       se vea dentro de la pantalla sin cortarse. */
     object-fit: contain; 
-    
     transition: transform 0.1s ease; 
     transform-origin: center center; 
+    /* OPTIMIZACIÓN GPU */
+    will-change: transform;
 }
 
 /* === BOTÓN JUGAR INICIAL === */
 #btn-jugar { 
     position: absolute; 
-    /* Levantado un poco más para librar barra de gestos por seguridad */
-    bottom: 10%; 
+    bottom: 12%; /* Lo subimos también para que no estorbe */
     left: 50%; 
     transform: translateX(-50%); 
-    
-    /* Tamaño responsivo */
     width: 60%; 
     max-width: 250px; 
-    
     z-index: 20; 
     background: none; 
     border: none; 
@@ -104,18 +91,13 @@ body {
 #btn-jugar img { width: 100%; height: auto; }
 #btn-jugar:active { transform: translateX(-50%) scale(0.9); }
 
-/* === BOTÓN DE PAUSA (CORREGIDO) === */
+/* === BOTÓN DE PAUSA === */
 #btn-pausa { 
     position: absolute; 
-    top: 2%; /* Pequeño margen superior */
-    
-    /* === SOLUCIÓN PAUSA FUERA DE PANTALLA === */
-    right: 3%; /* Valor positivo pequeño para pegarlo a la derecha visible */
-    
-    /* Tamaño ajustado para ser visible pero no gigante */
+    top: 2%; 
+    right: 3%; 
     width: 15%; 
     max-width: 70px; 
-    
     z-index: 30; 
     background: none; 
     border: none; 
@@ -129,38 +111,27 @@ body {
 /* === ZONAS DE CLICK (HITBOXES) === */
 #zonas-click { 
     position: absolute; 
-    /* Alineado con la parte inferior visual de las imágenes (.capa-btn) */
-    bottom: 5%; 
+    /* AHORA SÍ, BIEN ARRIBA PARA LIBRAR LA BARRA DE GESTOS */
+    bottom: 12%; 
     left: 0; 
     width: 100%; 
     height: 15%; 
-    
     display: flex; 
     justify-content: space-evenly; 
     align-items: center; 
     z-index: 15; 
-    
-    /* padding horizontal para que los hitboxes de las orillas 
-       no queden tan pegados si la pantalla es muy ancha */
     padding: 0 2%; 
 }
 
 .hitbox { 
     width: 22%; 
     height: 100%; 
-    background: transparent; /* Invisibles */
+    background: transparent; 
     border: none; 
     outline: none; 
     cursor: pointer; 
 }
 
-/* Efecto visual de feedback al tocar los hitboxes invisibles */
-.hitbox:active {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-
-/* Clase para animar los botones visuales desde JS */
 .animar-click { 
     transform: scale(0.9) !important; 
     filter: brightness(0.8); 
@@ -247,7 +218,6 @@ body {
     width: 100vw; 
     height: 100vh; 
     background: rgba(0, 0, 0, 0.45); 
-    /* Efecto Blur */
     backdrop-filter: blur(8px); 
     -webkit-backdrop-filter: blur(8px); 
     z-index: 100; 
@@ -258,7 +228,6 @@ body {
     left: 0; 
     width: 100%; 
     height: 100%; 
-    /* También usamos contain aquí para que el menú no se corte */
     object-fit: contain; 
     pointer-events: none; 
     transition: transform 0.1s ease; 
@@ -275,7 +244,7 @@ body {
     100% { transform: translateY(0); } 
 }
 
-/* Hitboxes del Menú de Pausa (Zonas invisibles apiladas) */
+/* Hitboxes del Menú de Pausa */
 .hitbox-pausa { 
     position: absolute; 
     left: 15%; 
@@ -287,23 +256,14 @@ body {
     z-index: 105; 
     cursor: pointer; 
 }
-/* Posiciones verticales ajustadas para tus imágenes transparentes */
 .btn-pos-1 { top: 41%; } 
 .btn-pos-2 { top: 52.5%; }
 .btn-pos-3 { top: 64%; }
 
-/* Feedback táctil para menú pausa */
-.hitbox-pausa:active {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-}
-
 /* === UTILIDADES === */
-/* Congela animaciones cuando hay pausa (clase añadida desde JS) */
 .congelar-animaciones * { 
     animation-play-state: paused !important; 
 }
-
 .oculto { 
     display: none !important; 
 }
