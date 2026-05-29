@@ -294,7 +294,7 @@ hitAcc1.addEventListener('click', () => {
         } else {
             pantallaPrincipal.src = 'imagenes/usando_telefono.png'; estaUsandoTelefono = true;
             const tiktoks = [audioTiktok1, audioTiktok2, audioTiktok3];
-            const frasesTiktok = ["¡Viendo TikToks de risa! 📱", "Un clip más y a dormir... 👁️👄👁️", "¡Encontré un buen edit! 🔥"];
+            const frasesTiktok = ["Que buen feed tengo", "Jajaja Tung Tung Sahur", "Activando la rachini 🔥"];
             
             function lanzarTiktok() {
                 tiktoks.forEach(a => { a.pause(); a.currentTime = 0; });
@@ -348,7 +348,7 @@ hitAcc2.addEventListener('click', () => {
         } else {
             pantallaPrincipal.src = 'imagenes/dormido_cama.png'; estaDurmiendoCama = true;
             const ronquidos = [audioDormido1, audioDormido2];
-            const frasesSueno = ["Zzz... ¡A mimir pesado! 😴", "Roncan2 bien a gusto con Ruty 💤"];
+            const frasesSueno = ["Zzz... ¡A mimir pesado! 😴", "💤💤💤💤", "Pensando en Ami💤"];
             
             function lanzarSueno() {
                 ronquidos.forEach(a => { a.pause(); a.currentTime = 0; });
